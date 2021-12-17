@@ -10,21 +10,13 @@ class HomePageProvider extends ChangeNotifier {
   TextEditingController currentInstallmentController = TextEditingController();
   TextEditingController payDayController = TextEditingController();
   TextEditingController amountController = TextEditingController();
+  var key;
 
-  Future<void> _openBox() async {
-    modelBox = await Hive.openBox<ListModel>('list');
-  }
-
-  Future<List<ListModel>> getBox() async {
-    _openBox();
-    return list = await modelBox!.get('list') as List<ListModel>;
-  }
-
-  List<ListModel> getList() {
-    getBox();
-    print("get liste");
+  getStartingData() async {
+    await Hive.openBox<ListModel>('list');
+    list = Hive.box<ListModel>('list').values.toList().cast<ListModel>();
+    Hive.close();
     notifyListeners();
-    return list;
   }
 
   clearFields() {
@@ -47,8 +39,8 @@ class HomePageProvider extends ChangeNotifier {
   }
 
   Future<void> addNewRecord() async {
-    await _openBox();
-    modelBox!.add(
+    await Hive.openBox<ListModel>('list');
+    Hive.box<ListModel>('list').add(
       ListModel(
         name: nameController.text,
         totalInstallment: int.parse(totalInstallmentInController.text),
@@ -58,8 +50,32 @@ class HomePageProvider extends ChangeNotifier {
         status: false,
       ),
     );
-    notifyListeners();
+
     clearFields();
-    modelBox!.close();
+    list = Hive.box<ListModel>('list').values.toList().cast<ListModel>();
+    Hive.close();
+    notifyListeners();
+  }
+
+  editExistingRecord() async {
+    await Hive.openBox<ListModel>('list');
+    Hive.box<ListModel>('list').delete(key);
+    addNewRecord();
+    //getStartingData();
+  }
+
+  deleteListItem(ListModel model) async {
+    await Hive.openBox<ListModel>('list');
+    Hive.box<ListModel>('list').delete(model.key);
+    getStartingData();
+  }
+
+  editCurrentItem(ListModel model) async {
+    key = model.key;
+    nameController.text = model.name;
+    totalInstallmentInController.text = model.totalInstallment.toString();
+    currentInstallmentController.text = model.currentInstallment.toString();
+    payDayController.text = model.payDay.toString();
+    amountController.text = model.amount.toString();
   }
 }

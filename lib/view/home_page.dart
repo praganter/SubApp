@@ -43,21 +43,22 @@ class HomePage extends StatelessWidget {
               Icons.add,
               color: Colors.white,
             ),
-            onPressed: () => bottomSheet(context),
+            onPressed: () => bottomSheet(context, false),
           ),
         ],
       ),
       extendBodyBehindAppBar: false,
-      body: (Provider.of<HomePageProvider>(context, listen: false).list.isEmpty)
+      body: (Provider.of<HomePageProvider>(context, listen: true).list.isEmpty)
           ? null
           : ListView.builder(
               itemBuilder: (context, i) {
                 return ListRow(
-                  index: i,
+                  model: Provider.of<HomePageProvider>(context, listen: true)
+                      .list[i],
                 );
               },
               itemCount: Provider.of<HomePageProvider>(context, listen: true)
-                  .getList()
+                  .list
                   .length),
       bottomNavigationBar: Container(
         height: MediaQuery.of(context).size.height * 0.08,

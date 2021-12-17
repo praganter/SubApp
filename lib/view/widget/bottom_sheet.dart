@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:subapp/providers/home_page_provider.dart';
 import 'new_record_row.dart';
 
-Future<dynamic> bottomSheet(BuildContext context) {
+Future<dynamic> bottomSheet(BuildContext context, bool isUpdate) {
   return showModalBottomSheet(
     //backgroundColor: Colors.blue,
     barrierColor: Colors.black.withOpacity(0.5),
@@ -39,8 +39,8 @@ Future<dynamic> bottomSheet(BuildContext context) {
                       Flexible(
                         flex: 5,
                         child: Column(
-                          children: [
-                            const Center(
+                          children: const [
+                            Center(
                               child: Text(
                                 'Yeni Kayıt',
                                 style: TextStyle(
@@ -49,7 +49,7 @@ Future<dynamic> bottomSheet(BuildContext context) {
                                 ),
                               ),
                             ),
-                            const Divider(
+                            Divider(
                               color: Colors.white,
                               thickness: 1,
                             ),
@@ -142,15 +142,21 @@ Future<dynamic> bottomSheet(BuildContext context) {
                     highlightColor: Colors.transparent,
                     elevation: 0,
                     onPressed:
-                        Provider.of<HomePageProvider>(context, listen: true)
-                                .checkNewRecordFields()
+                        (Provider.of<HomePageProvider>(context, listen: true)
+                                    .checkNewRecordFields() &&
+                                !isUpdate)
                             ? () {
                                 Provider.of<HomePageProvider>(context,
                                         listen: false)
                                     .addNewRecord();
                                 Navigator.pop(context);
                               }
-                            : null,
+                            : () {
+                                Provider.of<HomePageProvider>(context,
+                                        listen: false)
+                                    .editExistingRecord();
+                                Navigator.pop(context);
+                              },
                     child: Text("KAYDET"),
                   ),
                 ),
