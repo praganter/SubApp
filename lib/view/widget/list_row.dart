@@ -1,7 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:subapp/model/list_model.dart';
-import 'package:hive/hive.dart';
 import 'package:subapp/providers/home_page_provider.dart';
 import 'package:subapp/view/widget/bottom_sheet.dart';
 
@@ -29,7 +29,9 @@ class ListRow extends StatelessWidget {
           borderRadius: const BorderRadius.horizontal(
             left: Radius.circular(50),
           ),
-          color: Colors.red.withOpacity(0.4),
+          color: model.status
+              ? Colors.green.withOpacity(0.4)
+              : Colors.red.withOpacity(0.4),
         ),
         height: MediaQuery.of(context).size.height / 10,
         width: MediaQuery.of(context).size.width,
@@ -41,8 +43,17 @@ class ListRow extends StatelessWidget {
             Flexible(
               flex: 1,
               child: IconButton(
-                onPressed: null,
-                icon: Icon(Icons.cancel_outlined),
+                focusColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onPressed: () => {
+                  Provider.of<HomePageProvider>(context, listen: false)
+                      .updateStatus(model)
+                },
+                icon: model.status == true
+                    ? Icon(Icons.check_circle_outline)
+                    : Icon(Icons.cancel_outlined),
                 alignment: Alignment.centerLeft,
               ),
             ),
@@ -63,7 +74,7 @@ class ListRow extends StatelessWidget {
                 children: [
                   Text(
                       "${model.currentInstallment} / ${model.totalInstallment} Ay "),
-                  Text(model.amount.toString() + " TL"),
+                  Text(model.amount.toStringAsFixed(2) + " TL"),
                 ],
               ),
             ),
@@ -76,18 +87,45 @@ class ListRow extends StatelessWidget {
                 children: [
                   Flexible(
                     child: IconButton(
-                      onPressed: () =>
-                          Provider.of<HomePageProvider>(context, listen: false)
-                              .deleteListItem(model),
+                      focusColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      splashColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      onPressed: () => showDialog(
+                        useSafeArea: true,
+                        context: context,
+                        builder: (_) => CupertinoAlertDialog(
+                          title: Text("SİL"),
+                          content: Text("Kayıt tamamen silinecek emin misin ?"),
+                          actions: [
+                            CupertinoDialogAction(
+                              child: Text("Hayır"),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                            CupertinoDialogAction(
+                                child: Text("Evet"),
+                                onPressed: () => {
+                                      Provider.of<HomePageProvider>(context,
+                                              listen: false)
+                                          .deleteRecord(model),
+                                      Navigator.pop(context)
+                                    }),
+                          ],
+                        ),
+                      ),
                       icon: Icon(Icons.delete_forever),
                     ),
                   ),
                   Flexible(
                     child: IconButton(
+                      focusColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      splashColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
                       onPressed: () {
                         Provider.of<HomePageProvider>(context, listen: false)
-                            .editCurrentItem(model);
-                        bottomSheet(context, true);
+                            .updateRecord(model);
+                        bottomSheet(context);
                       },
                       icon: Icon(Icons.edit_sharp),
                     ),

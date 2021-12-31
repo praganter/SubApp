@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:subapp/model/list_model.dart';
 import 'package:subapp/providers/home_page_provider.dart';
 import 'package:subapp/view/widget/bottom_sheet.dart';
 
@@ -11,6 +12,8 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    List<ListModel> model =
+        Provider.of<HomePageProvider>(context, listen: true).list;
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -43,23 +46,20 @@ class HomePage extends StatelessWidget {
               Icons.add,
               color: Colors.white,
             ),
-            onPressed: () => bottomSheet(context, false),
+            onPressed: () => bottomSheet(context),
           ),
         ],
       ),
       extendBodyBehindAppBar: false,
-      body: (Provider.of<HomePageProvider>(context, listen: true).list.isEmpty)
+      body: (model.isEmpty)
           ? null
           : ListView.builder(
               itemBuilder: (context, i) {
                 return ListRow(
-                  model: Provider.of<HomePageProvider>(context, listen: true)
-                      .list[i],
+                  model: model[i],
                 );
               },
-              itemCount: Provider.of<HomePageProvider>(context, listen: true)
-                  .list
-                  .length),
+              itemCount: model.length),
       bottomNavigationBar: Container(
         height: MediaQuery.of(context).size.height * 0.08,
         child: Row(
@@ -67,16 +67,24 @@ class HomePage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SummaryRow(
-              title: "Ayın Toplam Ödemesi",
-              amount: 0,
+              title: "Aylık Ödenen",
+              amount: Provider.of<HomePageProvider>(context, listen: false)
+                  .getMonthlyPaid(),
             ),
             SummaryRow(
-              title: "Tüm Borçlar ",
-              amount: 0,
+              title: "Aylık Ödenecek",
+              amount: Provider.of<HomePageProvider>(context, listen: false)
+                  .getMonthlyWillPaid(),
             ),
             SummaryRow(
-              title: "Tüm Ödenenler ",
-              amount: 0,
+              title: "Toplam Ödenen",
+              amount: Provider.of<HomePageProvider>(context, listen: false)
+                  .getTotalPaid(),
+            ),
+            SummaryRow(
+              title: "Toplam Ödenecek",
+              amount: Provider.of<HomePageProvider>(context, listen: false)
+                  .getTotalWillPaid(),
             )
           ],
         ),
